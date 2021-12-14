@@ -7,11 +7,11 @@ from collections import OrderedDict
 from aip import AipOcr
 
 
-#BEGIN
+# BEGIN
 APP_ID = '25087602'
 API_KEY = 'GmkAjvG9HLYy2F2RUNM0h8pW'
 SECRET_KEY = 'HM4efodMjqKgFqqtSuoBaPVyUfigTlYB'
-#END
+# END
 client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 
@@ -48,8 +48,11 @@ for name, URL in URLs.items():
             'div', attrs={'class': 'ActivityItem-meta'})[0].find_all('span', limit=2)[-1].text
         if not (post_time.split('-')[2].split(' ')[0] == f"{ctime.tm_mday}"):
             continue
-        title = post.find_all(
-            'div', attrs={'class': 'ContentItem ArticleItem'})[0]
+        title = post.find_all('div', attrs={'class': 'ContentItem ArticleItem'})
+        if title:
+            title = title[0]
+        else:
+            continue
         post_link = title.next.next.get('href')
 
         post_response = requests.get(f'https:{post_link}', headers={
@@ -64,33 +67,33 @@ for name, URL in URLs.items():
                 if e.text == "":
                     continue
                 else:  # 是文本
-                    _e_list.append(f"- {e.text}")
+                    _e_list.append(f"- {e.text}\n")
             elif e.attrs.get('data-size'):  # figure字段
                 img_url = e.next.next.attrs['data-original']
-                _e_list.append(f"![img]({img_url})")
-        Result[f"{name} {post_time}"] = "\n".join(_e_list)
+                _e_list.append(f"![img]({img_url})\n")
+        Result[f"{name} {post_time}"] = "".join(_e_list)
         break
 
 print('全部提取完成，正在保存文件')
 with open(f"{ctime.tm_mon}-{ctime.tm_mday}.md", 'w', encoding='utf-8') as fp:
     for name, content in Result.items():
-        fp.writelines(f"### {name} ")
+        fp.writelines(f"### {name} \n")
         fp.writelines(content + '\n')
         fp.writelines('\n' * 3)
 
 
-_data = open(f"{ctime.tm_mon}-{ctime.tm_mday}.txt",
+_data = open(f"{ctime.tm_mon}-{ctime.tm_mday}.md",
              'r', encoding='utf-8').readlines()
-#BEGIN
+# BEGIN
 push_url = 'http://www.pushplus.plus/send/e52fff7187b1400e870233aee67651d4'
-#END
+# END
 r_myself = requests.post(
     url=push_url,
     headers={'Content-Type': 'application/json'},
     data=json.dumps({
         'title': f"{ctime.tm_mon}-{ctime.tm_mday}日tzrb",
         'content': "".join(_data),
-        'topic': 'jijin',
+        # 'topic': 'jijin',
         'template': 'markdown',
     }).encode(encoding='utf-8')
 )

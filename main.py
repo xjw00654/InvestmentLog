@@ -46,7 +46,7 @@ for name, URL in URLs.items():
     for post in main_section.find_all('div', attrs={'class': 'List-item'}):
         post_time = post.find_all(
             'div', attrs={'class': 'ActivityItem-meta'})[0].find_all('span', limit=2)[-1].text
-        if not (post_time.split('-')[2].split(' ')[0] == "13"):
+        if not (post_time.split('-')[2].split(' ')[0] == f"{ctime.tm_mday}"):
             continue
         title = post.find_all(
             'div', attrs={'class': 'ContentItem ArticleItem'})[0]
@@ -91,7 +91,7 @@ r_myself = requests.post(
         'title': f"{ctime.tm_mon}-{ctime.tm_mday}日tzrb",
         'content': "".join(_data),
         'topic': 'jijin',
-        'template': 'txt',
+        'template': 'markdown',
     }).encode(encoding='utf-8')
 )
 if r_myself:

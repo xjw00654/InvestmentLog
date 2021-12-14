@@ -93,7 +93,7 @@ r_myself = requests.post(
     data=json.dumps({
         'title': f"{ctime.tm_mon}-{ctime.tm_mday}日tzrb",
         'content': "".join(_data),
-        # 'topic': 'jijin',
+        'topic': 'jijin',
         'template': 'markdown',
     }).encode(encoding='utf-8')
 )

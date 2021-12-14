@@ -46,7 +46,7 @@ for name, URL in URLs.items():
     for post in main_section.find_all('div', attrs={'class': 'List-item'}):
         post_time = post.find_all(
             'div', attrs={'class': 'ActivityItem-meta'})[0].find_all('span', limit=2)[-1].text
-        if not (post_time.split('-')[2].split(' ')[0] == f"{ctime.tm_mday}"):
+        if not (post_time.split('-')[2].split(' ')[0] == "13"):
             continue
         title = post.find_all(
             'div', attrs={'class': 'ContentItem ArticleItem'})[0]
@@ -59,40 +59,22 @@ for name, URL in URLs.items():
         contents = BeautifulSoup(post_response.text, 'html.parser').find_all(
             'div', attrs={'class': 'Post-RichTextContainer'})[0]
         _e_list = []
-        for e in contents.find_all('p'):
-            _e_list.append(e.text)
-        figs = contents.find_all('figure')
-        if figs:
-            print('找到图片')
-            table_results = []
-            for i, fig in enumerate(figs):
-                print('正在识别图片', i)
-                time.sleep(1)  # Free API: QPS=1
-                img_url = fig.next.next.attrs['data-original']
-                ocr_result = client.basicGeneralUrl(img_url)
-
-                if ocr_result:
-                    if ocr_result['words_result']:
-                        _r = []
-                        for e in ocr_result['words_result']:
-                            _r.append(e['words'])
-                        _r = "\n".join(_r)
-                    else:
-                        continue  # 图片里没有内容
-                else:
-                    _r = img_url  # 请求错误，直接把图片丢上去
-            table_results.append(f"表{i}内容: \n" + _r)
-
-            Result[f"{name} {post_time}"] = "\n".join(_e_list) + \
-                "\n\n图片内容:\n" + "\n".join(table_results)
-        else:
-            Result[f"{name} {post_time}"] = "\n".join(_e_list)
+        for e in contents.find_all(['p', 'figure']):
+            if e.attrs.get('data-pid'):  # p字段
+                if e.text == "":
+                    continue
+                else:  # 是文本
+                    _e_list.append(f"- {e.text}")
+            elif e.attrs.get('data-size'):  # figure字段
+                img_url = e.next.next.attrs['data-original']
+                _e_list.append(f"![img]({img_url})")
+        Result[f"{name} {post_time}"] = "\n".join(_e_list)
         break
 
 print('全部提取完成，正在保存文件')
-with open(f"{ctime.tm_mon}-{ctime.tm_mday}.txt", 'w', encoding='utf-8') as fp:
+with open(f"{ctime.tm_mon}-{ctime.tm_mday}.md", 'w', encoding='utf-8') as fp:
     for name, content in Result.items():
-        fp.writelines(name + '\n' * 3)
+        fp.writelines(f"### {name} ")
         fp.writelines(content + '\n')
         fp.writelines('\n' * 3)
 

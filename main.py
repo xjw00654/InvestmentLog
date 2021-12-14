@@ -7,9 +7,11 @@ from collections import OrderedDict
 from aip import AipOcr
 
 
+#BEGINE
 APP_ID = '25087602'
 API_KEY = 'GmkAjvG9HLYy2F2RUNM0h8pW'
 SECRET_KEY = 'HM4efodMjqKgFqqtSuoBaPVyUfigTlYB'
+#END
 client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 
@@ -97,8 +99,11 @@ with open(f"{ctime.tm_mon}-{ctime.tm_mday}.txt", 'w', encoding='utf-8') as fp:
 
 _data = open(f"{ctime.tm_mon}-{ctime.tm_mday}.txt",
              'r', encoding='utf-8').readlines()
+#BEGINE
+push_url = 'http://www.pushplus.plus/send/e52fff7187b1400e870233aee67651d4'
+#END
 r_myself = requests.post(
-    url='http://www.pushplus.plus/send/e52fff7187b1400e870233aee67651d4',
+    url=push_url,
     headers={'Content-Type': 'application/json'},
     data=json.dumps({
         'title': f"{ctime.tm_mon}-{ctime.tm_mday}日tzrb",
